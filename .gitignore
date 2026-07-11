@@ -1,0 +1,17 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# AWS credentials and private keys
+.aws/
+*.pem
+*.ppk
+credentials
+
+# Environment and secret files
+.env
+.env.*
+*.secret
+secrets.*
