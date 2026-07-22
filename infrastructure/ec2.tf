@@ -38,8 +38,52 @@ data "aws_ami" "ubuntu_2604" {
 # MediCore Bastion Host
 
 resource "aws_instance" "bastion" {
-  ami                         = data.aws_ami.ubuntu_2604.id
-  instance_type               = "t3.micro"
+  ami                  = data.aws_ami.ubuntu_2604.id
+  instance_type        = "t3.micro"
+  iam_instance_profile = aws_iam_instance_profile.bastion_cloudwatch.name
+
+  user_data = <<-EOF
+    #!/bin/bash
+    set -e
+
+    apt-get update -y
+    apt-get install -y wget
+
+    wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+
+    dpkg -i -E ./amazon-cloudwatch-agent.deb
+
+    mkdir -p /opt/aws/amazon-cloudwatch-agent/etc
+
+    cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json <<'CONFIG'
+    {
+      "agent": {
+        "run_as_user": "root"
+      },
+      "logs": {
+        "logs_collected": {
+          "files": {
+            "collect_list": [
+              {
+                "file_path": "/var/log/auth.log",
+                "log_group_name": "/medicore/bastion/auth",
+                "log_stream_name": "{instance_id}",
+                "retention_in_days": 7
+              }
+            ]
+          }
+        }
+      }
+    }
+    CONFIG
+
+    /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+      -a fetch-config \
+      -m ec2 \
+      -s \
+      -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+  EOF
+
   subnet_id                   = aws_subnet.public_a.id
   vpc_security_group_ids      = [aws_security_group.bastion.id]
   key_name                    = var.bastion_key_name

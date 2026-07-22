@@ -104,3 +104,103 @@ resource "aws_cloudwatch_metric_alarm" "alb_unhealthy_hosts" {
     Tier        = "Application"
   }
 }
+
+# CloudWatch Alarm 4:
+# Detects high CPU utilisation on the RDS database.
+
+resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
+  alarm_name        = "medicore-rds-high-cpu"
+  alarm_description = "Triggers when RDS CPU utilisation is at least 80 percent for three consecutive minutes."
+
+  namespace   = "AWS/RDS"
+  metric_name = "CPUUtilization"
+  statistic   = "Average"
+
+  period              = 60
+  evaluation_periods  = 3
+  datapoints_to_alarm = 3
+
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  threshold           = 80
+
+  dimensions = {
+    DBInstanceIdentifier = aws_db_instance.medicore.id
+  }
+
+  treat_missing_data = "notBreaching"
+
+  actions_enabled = false
+
+  tags = {
+    Name        = "medicore-rds-high-cpu"
+    Project     = "MediCore"
+    Environment = "Development"
+    ManagedBy   = "Terraform"
+    Tier        = "Database"
+  }
+}
+
+# CloudWatch log group for Bastion SSH authentication events.
+
+resource "aws_cloudwatch_log_group" "bastion_auth" {
+  name              = "/medicore/bastion/auth"
+  retention_in_days = 7
+
+  tags = {
+    Name        = "medicore-bastion-auth-logs"
+    Project     = "MediCore"
+    Environment = "Development"
+    ManagedBy   = "Terraform"
+    Tier        = "Management"
+  }
+}
+
+# Converts failed SSH password events into a custom CloudWatch metric.
+
+resource "aws_cloudwatch_log_metric_filter" "failed_ssh_logins" {
+  name           = "medicore-failed-ssh-logins"
+  log_group_name = aws_cloudwatch_log_group.bastion_auth.name
+  pattern        = "\"Failed password\""
+
+  metric_transformation {
+    name          = "FailedSSHLoginCount"
+    namespace     = "MediCore/Security"
+    value         = "1"
+    default_value = "0"
+    unit          = "Count"
+  }
+}
+
+# CloudWatch Alarm 5:
+# Detects three or more failed SSH login attempts within five minutes.
+
+resource "aws_cloudwatch_metric_alarm" "failed_ssh_logins" {
+  alarm_name        = "medicore-failed-ssh-login-attempts"
+  alarm_description = "Triggers when the Bastion records at least three failed SSH login attempts within five minutes."
+
+  namespace   = "MediCore/Security"
+  metric_name = "FailedSSHLoginCount"
+  statistic   = "Sum"
+
+  period              = 300
+  evaluation_periods  = 1
+  datapoints_to_alarm = 1
+
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  threshold           = 3
+
+  treat_missing_data = "notBreaching"
+  actions_enabled    = false
+
+  depends_on = [
+    aws_cloudwatch_log_metric_filter.failed_ssh_logins
+  ]
+
+  tags = {
+    Name        = "medicore-failed-ssh-login-attempts"
+    Project     = "MediCore"
+    Environment = "Development"
+    ManagedBy   = "Terraform"
+    Tier        = "Management"
+  }
+}

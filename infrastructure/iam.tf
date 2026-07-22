@@ -92,3 +92,57 @@ resource "aws_iam_role" "backup_operator" {
     Purpose = "Backup operations"
   }
 }
+
+# Technical IAM role used by the bastion EC2 instance
+# to send operating system and SSH authentication logs
+# to Amazon CloudWatch Logs.
+
+data "aws_iam_policy_document" "bastion_cloudwatch_trust" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "sts:AssumeRole"
+    ]
+
+    principals {
+      type = "Service"
+
+      identifiers = [
+        "ec2.amazonaws.com"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "bastion_cloudwatch" {
+  name               = "medicore-bastion-cloudwatch-role"
+  description        = "Allows the MediCore bastion host to publish SSH authentication logs to CloudWatch."
+  assume_role_policy = data.aws_iam_policy_document.bastion_cloudwatch_trust.json
+
+  tags = {
+    Name        = "medicore-bastion-cloudwatch-role"
+    Project     = "MediCore"
+    Environment = "Development"
+    ManagedBy   = "Terraform"
+    Tier        = "Management"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "bastion_cloudwatch_agent" {
+  role       = aws_iam_role.bastion_cloudwatch.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_instance_profile" "bastion_cloudwatch" {
+  name = "medicore-bastion-cloudwatch-profile"
+  role = aws_iam_role.bastion_cloudwatch.name
+
+  tags = {
+    Name        = "medicore-bastion-cloudwatch-profile"
+    Project     = "MediCore"
+    Environment = "Development"
+    ManagedBy   = "Terraform"
+    Tier        = "Management"
+  }
+}
