@@ -146,3 +146,220 @@ resource "aws_iam_instance_profile" "bastion_cloudwatch" {
     Tier        = "Management"
   }
 }
+
+# Least-privilege permissions for the Clinical Read-Only role.
+
+data "aws_iam_policy_document" "clinical_read_only_permissions" {
+  statement {
+    sid    = "ListMediCoreClinicalBucket"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket"
+    ]
+
+    resources = [
+      aws_s3_bucket.medicore_data.arn
+    ]
+  }
+
+  statement {
+    sid    = "ReadMediCoreClinicalObjects"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.medicore_data.arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "clinical_read_only" {
+  name   = "medicore-clinical-read-only-policy"
+  role   = aws_iam_role.clinical_read_only.id
+  policy = data.aws_iam_policy_document.clinical_read_only_permissions.json
+}
+
+# Least-privilege permissions for the Clinical Write role.
+
+data "aws_iam_policy_document" "clinical_write_permissions" {
+  statement {
+    sid    = "ListMediCoreClinicalBucket"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket"
+    ]
+
+    resources = [
+      aws_s3_bucket.medicore_data.arn
+    ]
+  }
+
+  statement {
+    sid    = "ReadAndWriteMediCoreClinicalObjects"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.medicore_data.arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "clinical_write" {
+  name   = "medicore-clinical-write-policy"
+  role   = aws_iam_role.clinical_write.id
+  policy = data.aws_iam_policy_document.clinical_write_permissions.json
+}
+
+# Least-privilege permissions for the Database Administrator role.
+
+data "aws_iam_policy_document" "db_admin_permissions" {
+  statement {
+    sid    = "ViewRDSConfiguration"
+    effect = "Allow"
+
+    actions = [
+      "rds:DescribeDBInstances",
+      "rds:DescribeDBSnapshots",
+      "rds:DescribeDBSubnetGroups",
+      "rds:ListTagsForResource"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ManageMediCoreDatabase"
+    effect = "Allow"
+
+    actions = [
+      "rds:ModifyDBInstance",
+      "rds:RebootDBInstance",
+      "rds:CreateDBSnapshot",
+      "rds:RestoreDBInstanceFromDBSnapshot"
+    ]
+
+    resources = [
+      aws_db_instance.medicore.arn
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "db_admin" {
+  name   = "medicore-db-admin-policy"
+  role   = aws_iam_role.db_admin.id
+  policy = data.aws_iam_policy_document.db_admin_permissions.json
+}
+
+# Read-only monitoring permissions for CloudWatch and CloudWatch Logs.
+
+data "aws_iam_policy_document" "monitoring_only_permissions" {
+  statement {
+    sid    = "ReadCloudWatchMonitoring"
+    effect = "Allow"
+
+    actions = [
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:GetMetricData",
+      "cloudwatch:GetMetricStatistics",
+      "cloudwatch:ListDashboards",
+      "cloudwatch:ListMetrics"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ReadCloudWatchLogs"
+    effect = "Allow"
+
+    actions = [
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:FilterLogEvents",
+      "logs:GetLogEvents",
+      "logs:StartQuery",
+      "logs:GetQueryResults",
+      "logs:StopQuery"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "monitoring_only" {
+  name   = "medicore-monitoring-read-only-policy"
+  role   = aws_iam_role.monitoring_only.id
+  policy = data.aws_iam_policy_document.monitoring_only_permissions.json
+}
+
+# Least-privilege permissions for the Backup Operator role.
+
+data "aws_iam_policy_document" "backup_operator_permissions" {
+  statement {
+    sid    = "ListMediCoreBackupBucket"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket"
+    ]
+
+    resources = [
+      aws_s3_bucket.medicore_data.arn
+    ]
+  }
+
+  statement {
+    sid    = "ManageMediCoreBackupObjects"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.medicore_data.arn}/*"
+    ]
+  }
+
+  statement {
+    sid    = "ViewRDSSnapshots"
+    effect = "Allow"
+
+    actions = [
+      "rds:DescribeDBInstances",
+      "rds:DescribeDBSnapshots"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "CreateMediCoreDatabaseSnapshots"
+    effect = "Allow"
+
+    actions = [
+      "rds:CreateDBSnapshot"
+    ]
+
+    resources = [
+      aws_db_instance.medicore.arn
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "backup_operator" {
+  name   = "medicore-backup-operator-policy"
+  role   = aws_iam_role.backup_operator.id
+  policy = data.aws_iam_policy_document.backup_operator_permissions.json
+}
