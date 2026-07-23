@@ -52,3 +52,13 @@ resource "aws_autoscaling_group" "application" {
     propagate_at_launch = true
   }
 }
+
+# Scale out the application tier by one instance
+resource "aws_autoscaling_policy" "scale_out" {
+  name                   = "medicore-application-scale-out"
+  autoscaling_group_name = aws_autoscaling_group.application.name
+  adjustment_type        = "ChangeInCapacity"
+  scaling_adjustment     = 1
+  cooldown               = 300
+}
+

@@ -22,7 +22,10 @@ resource "aws_cloudwatch_metric_alarm" "app_high_cpu" {
 
   treat_missing_data = "notBreaching"
 
-  actions_enabled = false
+  actions_enabled = true
+
+  alarm_actions = [
+  aws_autoscaling_policy.scale_out.arn]
 
   tags = {
     Name        = "medicore-app-high-cpu"

@@ -4,7 +4,7 @@ resource "aws_launch_template" "application" {
 
   name_prefix = "medicore-application-"
 
-  image_id      = data.aws_ami.ubuntu_2604.id
+  image_id      = "ami-08e2a1f7c8b4c96b8"
   instance_type = "t3.micro"
 
   key_name = var.bastion_key_name
