@@ -15,3 +15,8 @@ credentials
 .env.*
 *.secret
 secrets.*
+
+# Terraform plan files
+tfplan
+*.tfplan
+crash.log
