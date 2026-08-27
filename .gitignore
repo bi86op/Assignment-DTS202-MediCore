@@ -19,4 +19,5 @@ secrets.*
 # Terraform plan files
 tfplan
 *.tfplan
-crash.log
+crash.log.ipynb_checkpoints/
+analysis/.ipynb_checkpoints/
