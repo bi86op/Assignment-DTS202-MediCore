@@ -54,12 +54,34 @@ resource "aws_lb_target_group" "application" {
   }
 }
 
-# HTTP Listener
-
+# HTTP Listener - redirect all HTTP traffic to HTTPS
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.application.arn
   port              = 80
   protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+
+  tags = {
+    Name = "medicore-http-listener"
+  }
+}
+
+# HTTPS Listener - forward HTTPS traffic to the application target group
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.application.arn
+  port              = 443
+  protocol          = "HTTPS"
+
+  certificate_arn = "arn:aws:acm:eu-west-2:202102860648:certificate/ab83c4a9-662e-4c7a-bd5e-f7427e7f0388"
 
   default_action {
     type             = "forward"
@@ -67,6 +89,6 @@ resource "aws_lb_listener" "http" {
   }
 
   tags = {
-    Name = "medicore-http-listener"
+    Name = "medicore-https-listener"
   }
 }
