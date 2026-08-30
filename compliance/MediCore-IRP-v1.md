@@ -1210,10 +1210,10 @@ MediCore Health Systems is responding to a ransomware incident affecting
 part of our clinical environment. Approximately 47,000 patient records
 have been encrypted, resulting in temporary disruption to clinical
 information services; there is currently no confirmed evidence of data
-exfiltration**,** but the forensic investigation remains ongoing.
+exfiltration, but the forensic investigation remains ongoing.
 
 Service availability has been affected since 03:14 on 28 August
-2026**,** and the time for full restoration is not yet confirmed.
+2026, and the time for full restoration is not yet confirmed.
 Recovery of the application and database services is underway using
 clean application instances and validated RDS recovery data, with
 integrity and security checks required before normal service is
@@ -1222,7 +1222,7 @@ restored.
 MediCore is managing its regulatory notification obligations in
 accordance with UK GDPR Article 33. Until services are fully restored,
 affected clinical teams should continue to follow their established
-business continuity and contingency procedures**.**
+business continuity and contingency procedures.
 
 The next update on clinical impact and recovery will be provided within
 24 hours, or sooner if there is a significant change.
