@@ -157,42 +157,6 @@ The NCSC Cloud Security Principles recommend protecting data in transit using es
 
 ---
 
-## Repository Structure
-
-```text
-Assignment-DTS202-MediCore/
-│
-├── infrastructure/
-│   └── Terraform Infrastructure as Code files
-│
-├── docker/
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   └── vulnerability-notes.md
-│
-├── kubernetes/
-│   ├── deployment.yaml
-│   └── service.yaml
-│
-├── screenshots/
-│   └── assignment evidence organised by assessment activity
-│
-├── analysis/
-│   ├── Jupyter Notebook
-│   ├── monitoring CSV files
-│   ├── requirements.txt
-│   └── generated analysis outputs
-│
-├── compliance/
-│   └── MediCore Incident Response Plan and supporting documents
-│
-├── .github/
-│   └── workflows/
-│
-└── README.md
-```
-
----
 
 # Deployment Instructions
 
