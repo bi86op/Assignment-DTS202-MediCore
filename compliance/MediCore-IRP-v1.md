@@ -1254,7 +1254,7 @@ The Incident Lead must record:
 
 ---
 
-## 12. Evidence and Accountability
+## Evidence and Accountability
 
 The following assignment evidence supports this IRP:
 
