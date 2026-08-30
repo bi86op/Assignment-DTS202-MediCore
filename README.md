@@ -570,7 +570,7 @@ The visualisations include:
 The analysis provides a baseline for identifying infrastructure behaviour and potential security events.
 
 ---
-# 1. AWS Services and Architecture Rationale
+# AWS Services and Architecture Rationale
    
 | AWS Service                         | Purpose                                    | Rationale                                                                                                                                                                                     |
 | ----------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -583,7 +583,7 @@ The analysis provides a baseline for identifying infrastructure behaviour and po
 | **AWS IAM**                         | Access control                             | Supports role-based, least-privilege access and separation of responsibilities through the five MediCore IAM roles.                                                                           |
 | **Amazon CloudWatch**               | Monitoring and alerting                    | Provides native integration with AWS metrics and logs and was used for alarms and failed-SSH monitoring without introducing a separate monitoring platform.                                   |
 
-# 2. Tools Used and Rationale
+# Tools Used and Rationale
 
 The tools used in this project were selected based on security, reproducibility, integration with AWS and their suitability for demonstrating industry-standard cloud and DevSecOps practices.
 
@@ -594,7 +594,7 @@ The tools used in this project were selected based on security, reproducibility,
 | **Git / GitHub** | Version control | Selected instead of maintaining local copies of configuration files because Git provides version history, traceability and the ability to review changes to infrastructure, security configuration and documentation. |
 | **Docker** | Application containerisation | Selected instead of relying directly on the host operating system because containers provide a consistent and reproducible runtime that can be hardened and vulnerability-scanned independently. |
 | **Docker Compose** | Container runtime configuration | Selected instead of individual `docker run` commands because security settings such as CPU and memory limits, a read-only filesystem, tmpfs and Docker secrets can be defined consistently in a version-controlled configuration file. |
-| **Trivy** | Primary vulnerability scanning | Selected over Snyk as the primary scanner because Trivy it is open source, lightweight, straightforward to run locally and suitable for container-image vulnerability scanning. It also fits automated DevSecOps workflows. |
+| **Trivy** | Primary vulnerability scanning | Selected over Snyk as the primary scanner because Trivy is open source, lightweight, straightforward to run locally and suitable for container-image vulnerability scanning. It also fits automated DevSecOps workflows. |
 | **Grype** | Secondary vulnerability scanning | Used alongside Trivy rather than relying on a single scanner. This allowed findings to be cross-checked using an independent vulnerability-scanning engine. |
 | **Kubernetes** | Container orchestration | Used to demonstrate production-oriented container controls including replicas, health checking, resource requests and limits, and non-root execution. This provides controls beyond those available from running individual Docker containers alone. |
 | **Python / pandas** | Monitoring-data analysis | Selected instead of manually analysing exported CSV data because pandas provides reproducible filtering, aggregation and processing of CloudWatch monitoring data. |
