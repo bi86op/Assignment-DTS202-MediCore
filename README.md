@@ -570,29 +570,40 @@ The visualisations include:
 The analysis provides a baseline for identifying infrastructure behaviour and potential security events.
 
 ---
+# 1. AWS Services and Architecture Rationale
+   
+| AWS Service                         | Purpose                                    | Rationale                                                                                                                                                                                     |
+| ----------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AWS VPC**                         | Network isolation                          | Provides a dedicated network boundary and enables separation of public, application and database tiers.                                                                                       |
+| **Amazon EC2**                      | Application and administrative compute     | Provides flexible compute for the private application tier and bastion host and integrates directly with ALB and Auto Scaling.                                                                |
+| **Application Load Balancer (ALB)** | Traffic distribution and HTTPS termination | Distributes application traffic across multiple instances and Availability Zones, performs health checks and provides a central HTTPS endpoint.                                               |
+| **EC2 Auto Scaling**                | Application resilience                     | Maintains the required application capacity and automatically replaces unhealthy instances.                                                                                                   |
+| **Amazon RDS for PostgreSQL**       | Clinical database                          | Selected instead of a self-managed database for the main clinical database because RDS provides managed backups, PITR and storage encryption while reducing database administration overhead. |
+| **Amazon S3**                       | Object storage                             | Provides scalable object storage with SSE-S3 encryption and Block Public Access controls.                                                                                                     |
+| **AWS IAM**                         | Access control                             | Supports role-based, least-privilege access and separation of responsibilities through the five MediCore IAM roles.                                                                           |
+| **Amazon CloudWatch**               | Monitoring and alerting                    | Provides native integration with AWS metrics and logs and was used for alarms and failed-SSH monitoring without introducing a separate monitoring platform.                                   |
 
-# Tools Used and Rationale
+# 2. Tools Used and Rationale
 
-| Tool / Service | Purpose | Rationale |
+The tools used in this project were selected based on security, reproducibility, integration with AWS and their suitability for demonstrating industry-standard cloud and DevSecOps practices.
+
+| Tool / Service | Purpose | Rationale and Alternative Considered |
 |---|---|---|
-| AWS VPC | Network isolation | Provides logical separation between public, application and database resources. |
-| AWS EC2 | Application and administrative compute | Provides flexible compute resources for the application tier and bastion host. |
-| AWS ALB | Traffic distribution | Provides a single public application endpoint, health checking and HTTPS termination. |
-| AWS Auto Scaling | Application resilience | Maintains application capacity and replaces unhealthy instances. |
-| Amazon RDS PostgreSQL | Clinical database | Provides managed relational database functionality with encryption, backups and PITR. |
-| Amazon S3 | Object storage | Provides encrypted object storage with Block Public Access. |
-| AWS IAM | Access control | Enables role-based permissions and separation of operational responsibilities. |
-| Amazon CloudWatch | Monitoring and alerting | Provides metrics, logs and alarms for operational and security monitoring. |
-| Terraform | Infrastructure as Code | Makes infrastructure configuration repeatable, reviewable and version controlled. |
-| Git / GitHub | Version control | Maintains an auditable history of project code and documentation. |
-| Docker | Containerisation | Provides a consistent and isolated application runtime. |
-| Docker Compose | Container configuration | Defines resource limits, read-only storage and secret handling in a reproducible configuration. |
-| Trivy | Vulnerability scanning | Detects known vulnerabilities and configuration issues in container images. |
-| Grype | Vulnerability scanning | Provides a second vulnerability scanner to cross-check container findings. |
-| Kubernetes | Container orchestration | Demonstrates replicas, health checking, resource management and non-root execution. |
-| Python / pandas | Data analysis | Used to process exported CloudWatch monitoring data. |
-| Matplotlib | Data visualisation | Used to create security and performance visualisations from monitoring data. |
-| Jupyter Notebook | Reproducible analysis | Combines analysis code, outputs and interpretation in one documented workflow. |
+| **Terraform** | Infrastructure as Code (IaC) | Selected over manual AWS Console configuration and AWS CloudFormation because it provides a declarative, version-controlled and repeatable deployment using readable HCL. Unlike CloudFormation, Terraform is not limited to AWS and provides transferable multi-cloud IaC skills. NCSC guidance recommends Infrastructure as Code for non-experimental cloud environments because it supports consistency, recovery and security review of infrastructure definitions. |
+| **AWS CLI** | AWS configuration and verification | Used alongside the AWS Management Console because command-line operations are repeatable and provide an additional way to verify deployed resources rather than relying only on manual console interaction. |
+| **Git / GitHub** | Version control | Selected instead of maintaining local copies of configuration files because Git provides version history, traceability and the ability to review changes to infrastructure, security configuration and documentation. |
+| **Docker** | Application containerisation | Selected instead of relying directly on the host operating system because containers provide a consistent and reproducible runtime that can be hardened and vulnerability-scanned independently. |
+| **Docker Compose** | Container runtime configuration | Selected instead of individual `docker run` commands because security settings such as CPU and memory limits, a read-only filesystem, tmpfs and Docker secrets can be defined consistently in a version-controlled configuration file. |
+| **Trivy** | Primary vulnerability scanning | Selected over Snyk as the primary scanner because Trivy it is open source, lightweight, straightforward to run locally and suitable for container-image vulnerability scanning. It also fits automated DevSecOps workflows. |
+| **Grype** | Secondary vulnerability scanning | Used alongside Trivy rather than relying on a single scanner. This allowed findings to be cross-checked using an independent vulnerability-scanning engine. |
+| **Kubernetes** | Container orchestration | Used to demonstrate production-oriented container controls including replicas, health checking, resource requests and limits, and non-root execution. This provides controls beyond those available from running individual Docker containers alone. |
+| **Python / pandas** | Monitoring-data analysis | Selected instead of manually analysing exported CSV data because pandas provides reproducible filtering, aggregation and processing of CloudWatch monitoring data. |
+| **Matplotlib** | Data visualisation | Selected instead of manually creating charts because visualisations can be generated programmatically and reproduced directly from the analysed data. |
+| **Jupyter Notebook** | Reproducible analysis | Selected because code, outputs, visualisations and interpretation can be retained together in one reproducible analysis rather than separating the analysis code from its results. |
+
+NCSC guidance supports the use of Infrastructure as Code for cloud deployments because it can improve consistency, support recovery and allow infrastructure definitions to be reviewed for security issues.
+
+OWASP container security guidance recommends controls including resource limits and read-only filesystems. These recommendations informed the Docker and Docker Compose hardening used in this project.
 
 ---
 
